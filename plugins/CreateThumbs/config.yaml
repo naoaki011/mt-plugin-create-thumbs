@@ -1,0 +1,30 @@
+name: CreateThumbs
+description: <__trans phrase='Create Thumbnail for not managed Image by MT Asset.'>
+id: CreateThumbs
+version: 1.00
+author_name: naoaki.onozaki
+author_link: http://www.zelazny.mydns.jp/
+plugin_link: http://github.com/naoaki011/mt-plugin-crate-thumbs/
+
+tags:
+  function:
+    # Loaded File
+    CreateThumbLoadFileURL:      $CreateThumbs::CreateThumbs::Plugin::image_url
+    CreateThumbLoadFilePath:     $CreateThumbs::CreateThumbs::Plugin::image_path
+    CreateThumbLoadBasePath:     $CreateThumbs::CreateThumbs::Plugin::base_path
+    CreateThumbLoadFileName:     $CreateThumbs::CreateThumbs::Plugin::image_name
+    CreateThumbLoadFileBasename: $CreateThumbs::CreateThumbs::Plugin::image_basename
+    CreateThumbLoadFileExt:      $CreateThumbs::CreateThumbs::Plugin::image_ext
+    CreateThumbLoadImageWidth:   $CreateThumbs::CreateThumbs::Plugin::image_width
+    CreateThumbLoadImageHeight:  $CreateThumbs::CreateThumbs::Plugin::image_height
+    # Thumbnail File
+    CreateThumbFileURL:          $CreateThumbs::CreateThumbs::Plugin::thumb_url
+    CreateThumbFilePath:         $CreateThumbs::CreateThumbs::Plugin::thumb_path
+    CreateThumbBasePath:         $CreateThumbs::CreateThumbs::Plugin::thumb_base_path
+    CreateThumbFileName:         $CreateThumbs::CreateThumbs::Plugin::thumb_image_name
+    CreateThumbImageWidth:       $CreateThumbs::CreateThumbs::Plugin::thumb_image_width
+    CreateThumbImageHeight:      $CreateThumbs::CreateThumbs::Plugin::thumb_image_height
+  block:
+    CreateThumbsLoadFiles:       $CreateThumbs::CreateThumbs::Plugin::find_images
+#    CreateThumbsLoadFile:        $CreateThumbs::CreateThumbs::Plugin::load_image
+    CreateThumbFile:             $CreateThumbs::CreateThumbs::Plugin::create_thumb
