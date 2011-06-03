@@ -24,7 +24,8 @@ sub find_images {
 			opendir( THISDIR, $photodir ) || die "Cannot open directory $photodir: $1";
 			my @allfiles = grep( !/^\.\.?$/, readdir( THISDIR ) );
 			closedir( THISDIR );
-			my $exclude = $args->{exclude};
+			my $exclude;
+			$exclude = $args->{exclude};
 			if ( $exclude ne '' ) {
 				@allfiles = grep( !/^.*$exclude.*$/, @allfiles );
 			}
@@ -38,80 +39,8 @@ sub find_images {
 				}
 			}
 			my @sortedfiles;
-			my $sort = $args->{sort_order};
-			if ( $sort eq 'ascend' ) {
-				@sortedfiles = sort @usefiles;
-			}
-			else {
-				@sortedfiles = reverse sort @usefiles;
-			}
-			my $filename;
-			foreach $filename ( @sortedfiles ) {
-				my $out;
-				$ctx->stash( 'ImageName', "$filename" );
-				my $filepath;
-				$filepath = $photodir . '/' . $filename;
-				$filepath =~ s/\/\//\//g;
-				$ctx->stash( 'ImagePath', "$filepath" );
-				my($basename, $basepath, $ext) = File::Basename::fileparse($filepath, '\..*');
-				$ctx->stash( 'BasePath', "$basepath" );
-				$ctx->stash( 'ImageBasename', "$basename" );
-				$ctx->stash( 'ImageExt', "$ext" );
-				my $img_type;
-				if ($ext =~ m/^\.gif$/i) {
-					$img_type = 'gif';
-				} elsif ($ext =~ m/^\.(jpg)|(jpeg)$/i) {
-					$img_type = 'jpeg';
-				} elsif ($ext =~ m/^\.png$/i) {
-					$img_type = 'png';
-				}
-				my $img = MT::Image->new( Filename => $filepath,
-											Type => $img_type )
-					or return $ctx->error("Reading '$filepath' failed: ". MT::Image->errstr);
-				$ctx->stash( 'ImageFile', $img );
-
-				$out = $builder->build( $ctx, $tokens )
-				  or return $ctx->error( $builder->errstr );
-				$res .= $out;
-			}
-		}
-	}
-    return $res;
-}
-
-sub load_image {
-	my ($ctx, $args, $cond) = @_;
-	my $builder = $ctx->stash('builder');
-	my $tokens = $ctx->stash('tokens');
-	my $blog = MT::Blog->load( $ctx->stash('blog')->id );
-	my $res;
-	my $photodir = $args->{path};
-	if (! -e $photodir){
-		doLog($photodir . ' is not exist.');
-	}
-	else {
-		if (! -d $photodir){
-			doLog($photodir . ' is not directory.');
-		}
-		else {
-			opendir( THISDIR, $photodir ) || die "Cannot open directory $photodir: $1";
-			my @allfiles = grep( !/^\.\.?$/, readdir( THISDIR ) );
-			closedir( THISDIR );
-			my $exclude = $args->{exclude};
-			if ( $exclude ne '' ) {
-				@allfiles = grep( !/^.*$exclude.*$/, @allfiles );
-			}
-			my $photofile;
-			my $ext = $args->{extension};
-			my @usefiles;
-			foreach $photofile ( @allfiles ) {
-				if ( $photofile =~ /^(.+)\.($ext)$/ ) {
-#					doLog( File::Spec->catfile( $photodir, $photofile ) );
-					push( @usefiles, "$photofile" );
-				}
-			}
-			my @sortedfiles;
-			my $sort = $args->{sort_order};
+			my $sort;
+			$sort = $args->{sort_order};
 			if ( $sort eq 'ascend' ) {
 				@sortedfiles = sort @usefiles;
 			}
@@ -206,6 +135,41 @@ sub image_height {
 	return $height;
 }
 
+sub load_image {
+	my ($ctx, $args, $cond) = @_;
+	my $builder = $ctx->stash('builder');
+	my $tokens = $ctx->stash('tokens');
+	my $blog = MT::Blog->load( $ctx->stash('blog')->id );
+	my $filepath = $args->{path};
+	$filepath =~ s/\/\//\//g;
+	$ctx->stash( 'ImagePath', "$filepath" );
+	my($basename, $basepath, $ext) = File::Basename::fileparse($filepath, '\..*');
+	my $filename = $basename . '.' . $ext;
+	$ctx->stash( 'ImageName', "$filename" );
+	$ctx->stash( 'ImageBasename', "$basename" );
+	$ctx->stash( 'BasePath', "$basepath" );
+	$ctx->stash( 'ImageExt', "$ext" );
+	my $res;
+	my $img_type;
+	if ($ext =~ m/^\.gif$/i) {
+		$img_type = 'gif';
+	} elsif ($ext =~ m/^\.(jpg)|(jpeg)$/i) {
+		$img_type = 'jpeg';
+	} elsif ($ext =~ m/^\.png$/i) {
+		$img_type = 'png';
+	}
+	if ($img_type) {
+		my $img = MT::Image->new( Filename => $filepath,
+									Type => $img_type )
+			or return $ctx->error("Reading '$filepath' failed: ". MT::Image->errstr);
+		$ctx->stash( 'ImageFile', $img );
+		my $out = $builder->build( $ctx, $tokens )
+		  or return $ctx->error( $builder->errstr );
+		$res .= $out;
+	}
+	return $res;
+}
+
 sub create_thumb {
 	my ($ctx, $args, $cond) = @_;
 	my $builder = $ctx->stash('builder');
@@ -213,7 +177,7 @@ sub create_thumb {
 	my $blog = MT::Blog->load( $ctx->stash('blog')->id );
 	my $fmgr = $blog->file_mgr;
 
-	my $thumb_filename = $ctx->stash('ImageBasename') . $args->{suffix} . $ctx->stash('ImageExt');
+	my $thumb_filename = $args->{prefix} . $ctx->stash('ImageBasename') . $args->{suffix} . $ctx->stash('ImageExt');
 	$ctx->stash( 'ThumbFilename', "$thumb_filename" );
 
 	my $thumb_basepath = $args->{base};
@@ -288,7 +252,7 @@ sub doLog {
     return unless defined($msg);
     require MT::Log;
     my $log = MT::Log->new;
-    $log->message($msg) ;
+    $log->message($msg);
     $log->save or die $log->errstr;
 }
 

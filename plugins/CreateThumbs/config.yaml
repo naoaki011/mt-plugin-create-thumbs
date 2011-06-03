@@ -1,7 +1,7 @@
 name: CreateThumbs
 description: <__trans phrase='Create Thumbnail for not managed Image by MT Asset.'>
 id: CreateThumbs
-version: 1.00
+version: 1.01
 author_name: naoaki.onozaki
 author_link: http://www.zelazny.mydns.jp/
 plugin_link: http://github.com/naoaki011/mt-plugin-crate-thumbs/
@@ -25,6 +25,6 @@ tags:
     CreateThumbImageWidth:       $CreateThumbs::CreateThumbs::Plugin::thumb_image_width
     CreateThumbImageHeight:      $CreateThumbs::CreateThumbs::Plugin::thumb_image_height
   block:
+    CreateThumbsLoadFile:        $CreateThumbs::CreateThumbs::Plugin::load_image
     CreateThumbsLoadFiles:       $CreateThumbs::CreateThumbs::Plugin::find_images
-#    CreateThumbsLoadFile:        $CreateThumbs::CreateThumbs::Plugin::load_image
     CreateThumbFile:             $CreateThumbs::CreateThumbs::Plugin::create_thumb
